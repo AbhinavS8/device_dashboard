@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import { useEffect,useState } from 'react';
-
+import SocketMessages from "./components/websocket";
 function App() {
     const [backendData, setBackendData] = useState(null);
   
@@ -14,7 +14,7 @@ useEffect(() => {
   return (
     <div>
       <h1>React + Node Demo</h1>
-      {backendData ? (
+      {backendData ? ( //load backendData if available, else show loading
         <div>
           <p>{backendData.message}</p>
           <ul>
@@ -28,6 +28,10 @@ useEffect(() => {
       ) : (
         <p>Loading data...</p>
       )}
+      <div>
+        <h1>Live Messages</h1>
+        <SocketMessages />
+      </div>
     </div>
   );
 }
