@@ -5,8 +5,10 @@ const socket = io("http://localhost:5000"); // adjust port if needed
 
 export default function SocketMessages() {
   const [messages, setMessages] = useState([]);
+  const [sensor, setSensor] = useState(null);
 
   useEffect(() => {
+
     socket.on("connect", () => {
       console.log("Connected to server");
     });
@@ -15,20 +17,21 @@ export default function SocketMessages() {
       setMessages((prev) => [...prev, message]);
     });
     
+    socket.on("sensorUpdate", (message) => {
+      setSensor(message);
+    })
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
 
     // cleanup when component unmounts
     return () => {
       socket.off("newMessage");
       socket.off("connect");
-      socket.off("disconnect");
+      socket.off("sensorUpdate");
     };
   }, []);
 
   return (
+    <div>
     <ul>
       {messages.map((msg, idx) => (
         <li key={idx}>
@@ -36,5 +39,13 @@ export default function SocketMessages() {
         </li>
       ))}
     </ul>
+    <p>
+  Sensor data:{" "}
+  {sensor
+    ? `temp: ${sensor.temperature}, humidity: ${sensor.humidity}`
+    : "Waiting for sensor data..."}
+</p>
+
+</div>
   );
 }
