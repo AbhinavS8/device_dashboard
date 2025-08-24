@@ -40,7 +40,6 @@ app.get("/ping", (_req, res) => {
 io.on("connection", (socket) => {
     console.log("new user detected");
 
-
     socket.emit('newMessage', { from: 'Server', text: 'Welcome!', createdAt: Date.now() });
 
     socket.on('createMessage', (message) => {
@@ -48,10 +47,22 @@ io.on("connection", (socket) => {
         io.emit('newMessage', message); // Send to everyone
     });
 
+    
+    const interval = setInterval(() =>{
+      const sensorData = {
+        temperature: 35,
+        humidity: Math.random(),
+        timestamp: Date.now()
+      }
+      
+      io.emit("sensorUpdate", sensorData);
+    },2000);
+
     socket.on("disconnect", ()=> {
         console.log("user disconnected");
-    })
-})
+        clearInterval(interval); // stop sending when client leaves
+      })
+});
 
 
 server.listen(port,() => console.log(`server starting...`))
