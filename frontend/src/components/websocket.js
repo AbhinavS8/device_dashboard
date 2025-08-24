@@ -17,9 +17,11 @@ export default function SocketMessages() {
       setMessages((prev) => [...prev, message]);
     });
     
-    socket.on("sensorUpdate", (message) => {
-      setSensor(message);
-    })
+    socket.on("sensorUpdate", (data) => {
+      console.log("Got sensor data:", data); // should log { temperature: 43 }
+      setSensor(data);
+    });
+
 
 
     // cleanup when component unmounts
@@ -42,9 +44,10 @@ export default function SocketMessages() {
     <p>
   Sensor data:{" "}
   {sensor
-    ? `temp: ${sensor.temperature}, humidity: ${sensor.humidity}`
+    ? `temp: ${sensor.temperature}`
     : "Waiting for sensor data..."}
 </p>
+
 
 </div>
   );
