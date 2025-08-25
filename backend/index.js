@@ -17,7 +17,9 @@ const io = socketio(server, {
 const client = mqtt.connect("mqtt://test.mosquitto.org:1883");
 client.on("connect", () => {
   console.log("Connected to MQTT broker");
-  client.subscribe("myhome/sensors/temperature"); // replace with your topic
+  client.subscribe("myhome/sensors/temperature"); 
+  client.subscribe("myhome/sensors/humidity"); 
+  //multiple clients, one for each graph
 });
 
 app.use(cors());
@@ -27,15 +29,6 @@ app.get("/", (req,res) => {
     res.send("waz good from express+node")
 })
 
-// app.get("/api/data", (req,res) => {
-//     res.json({
-//     message: "Hello from the backend",
-//     sensors: [
-//       { id: 1, name: "Temperature Sensor", value: 25 },
-//       { id: 2, name: "Humidity Sensor", value: 60 }
-//     ]
-//   });
-// })
 
 app.get("/ping", (_req, res) => {
   return res.json({ msg: "Ping Successful" });
@@ -44,35 +37,29 @@ app.get("/ping", (_req, res) => {
 //websocket
 io.on("connection", (socket) => {
     console.log("new user detected");
-
     socket.emit('newMessage', { from: 'Server', text: 'Welcome!', createdAt: Date.now() });
 
-    
-    
-    // const interval = setInterval(() =>{
-    //   const sensorData = {
-    //     temperature: 35,
-    //     humidity: Math.random(),
-    //     timestamp: Date.now()
+    //current plan, send with topic, create graph for each topic
+    // client.on("message", (topic, message) => {
+    //   try {
+    //     const parsed = JSON.parse(message.toString());
+    //     io.emit("sensorUpdate", parsed); // send as object
+    //   } catch (err) {
+    //     console.error("Failed to parse MQTT message:", message.toString());
     //   }
-      
-    //   io.emit("sensorUpdate", sensorData);
-    // },2000);
-    
+    // });
 
     client.on("message", (topic, message) => {
       try {
-        const parsed = JSON.parse(message.toString()); // 👈 convert string → object
-        io.emit("sensorUpdate", parsed); // send as object
+        const parsed = JSON.parse(message.toString());
+        io.emit("sensorUpdate", { topic, ...parsed });
       } catch (err) {
         console.error("Failed to parse MQTT message:", message.toString());
       }
     });
 
-
     socket.on("disconnect", ()=> {
         console.log("user disconnected");
-        // clearInterval(interval); // stop sending when client leaves
       })
 });
 
