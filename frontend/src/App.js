@@ -29,6 +29,8 @@ function App() {
     //     <p>Loading data...</p>
     //   )}
       <div>
+        <p>enter topic:</p>
+        {/* <form in></form> */}
         <h1>Live Messages</h1>
         <SocketMessages />
       </div>
