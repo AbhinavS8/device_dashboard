@@ -1,3 +1,31 @@
+/* App.css */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  background: #181818;
+  color: #f1f1f1;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+ h1, h2, h3, h4, h5 {
+  color: #90caf9;
+}
+
+input, button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #23272a;
+}
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
 .App {
   text-align: center;
 }

@@ -12,29 +12,30 @@ function App() {
 //   }, []);
 
   return (
-    // <div>
-    //   <h1>React + Node Demo</h1>
-    //   {backendData ? ( //load backendData if available, else show loading
-    //     <div>
-    //       <p>{backendData.message}</p>
-    //       <ul>
-    //         {backendData.sensors.map((s) => (
-    //           <li key={s.id}>
-    //             {s.name}: {s.value}
-    //           </li>
-    //         ))}
-    //       </ul>
-    //     </div>
-    //   ) : (
-    //     <p>Loading data...</p>
-    //   )}
-      <div>
-        <p>enter topic:</p>
-        {/* <form in></form> */}
-        <h1>Live Messages</h1>
+    <div style={{
+      minHeight: "100vh",
+      background: "#181818",
+      color: "#f1f1f1",
+      fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
+      padding: 0,
+      margin: 0,
+      boxSizing: "border-box"
+    }}>
+      <div style={{
+        maxWidth: 900,
+        margin: "0 auto",
+        padding: "32px 16px"
+      }}>
+        <h1 style={{
+          textAlign: "center",
+          fontWeight: 700,
+          fontSize: "2.5rem",
+          marginBottom: 24,
+          color: "#90caf9"
+        }}>Device Dashboard</h1>
         <SocketMessages />
       </div>
-    // </div>
+    </div>
   );
 }
 export default App;

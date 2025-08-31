@@ -58,43 +58,131 @@ export default function SocketMessages() {
 
   return (
     <div>
-      <form onSubmit={handleSubscribe} style={{ marginBottom: 20 }}>
+      <form
+        onSubmit={handleSubscribe}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          marginBottom: 32,
+          background: "#23272a",
+          padding: 16,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          alignItems: "center"
+        }}
+      >
         <input
           type="text"
           value={inputTopic}
           onChange={(e) => setInputTopic(e.target.value)}
           placeholder="Enter topic to subscribe"
+          style={{
+            flex: 1,
+            minWidth: 180,
+            padding: "10px 14px",
+            borderRadius: 6,
+            border: "none",
+            background: "#181818",
+            color: "#f1f1f1",
+            fontSize: "1rem",
+            outline: "none"
+          }}
         />
-        <button type="submit">Subscribe</button>
+        <button
+          type="submit"
+          style={{
+            background: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            padding: "10px 18px",
+            fontWeight: 600,
+            fontSize: "1rem",
+            cursor: "pointer",
+            transition: "background 0.2s"
+          }}
+        >
+          Subscribe
+        </button>
       </form>
 
-      {subscribedTopics.map((topic) => (
-        <div key={topic} style={{ marginBottom: 40 }}>
-          <h3>{topic}</h3>
-          <ResponsiveContainer width="100%" height={300}>
-  <LineChart
-    data={(topicData[topic] || []).map((entry) => ({
-      value: entry.data,
-      timestamp: new Date(entry.timestamp).toLocaleTimeString(),
-    }))}
-    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-  >
-    <CartesianGrid strokeDasharray="3 3" />
-    <XAxis dataKey="timestamp" />
-    <YAxis />
-    <Tooltip />
-    <Legend />
-    <Line
-      type="monotone"
-      dataKey="value"
-      stroke="#8884d8"
-      dot={false}
-    />
-  </LineChart>
-</ResponsiveContainer>
-
-        </div>
-      ))}
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 32
+      }}>
+        {subscribedTopics.map((topic) => (
+          <div
+            key={topic}
+            style={{
+              background: "#23272a",
+              borderRadius: 8,
+              padding: 20,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              width: "100%",
+              overflowX: "auto"
+            }}
+          >
+            <h3 style={{
+              color: "#90caf9",
+              fontWeight: 600,
+              fontSize: "1.3rem",
+              marginBottom: 16
+            }}>{topic}</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={(topicData[topic] || []).map((entry) => {
+                  // If entry.data is an object, spread its fields; else, use 'value'
+                  if (typeof entry.data === "object" && entry.data !== null) {
+                    return {
+                      ...entry.data,
+                      timestamp: new Date(entry.timestamp).toLocaleTimeString(),
+                    };
+                  } else {
+                    return {
+                      value: entry.data,
+                      timestamp: new Date(entry.timestamp).toLocaleTimeString(),
+                    };
+                  }
+                })}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                <XAxis dataKey="timestamp" stroke="#f1f1f1" />
+                <YAxis stroke="#f1f1f1" />
+                <Tooltip
+                  contentStyle={{ background: "#23272a", color: "#f1f1f1", border: "none" }}
+                  labelStyle={{ color: "#90caf9" }}
+                />
+                <Legend wrapperStyle={{ color: "#f1f1f1" }} />
+                {/* Dynamically render lines for each key except timestamp */}
+                {(() => {
+                  const dataArr = topicData[topic] || [];
+                  if (dataArr.length === 0) return null;
+                  const sample = dataArr[0].data;
+                  let keys = [];
+                  if (typeof sample === "object" && sample !== null) {
+                    keys = Object.keys(sample).filter(k => k !== "timestamp");
+                  } else {
+                    keys = ["value"];
+                  }
+                  return keys.map((key, idx) => (
+                    <Line
+                      key={key}
+                      type="monotone"
+                      dataKey={key}
+                      stroke={idx === 0 ? "#90caf9" : "#ff9800"}
+                      dot={false}
+                      strokeWidth={2}
+                    />
+                  ));
+                })()}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ))}
+      </div>
     </div>
   );
 // ...existing code...
