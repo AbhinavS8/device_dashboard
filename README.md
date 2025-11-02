@@ -37,7 +37,4 @@ A JavaScript dashboard that collects, visualizes, and stores data from IoT devic
      ```
 5. Open http://localhost:3000
 
-## Demo / Screenshots
-- Add screenshots/GIF file(s) into `/docs/screenshots` and reference them here.
-- If live demo deployed, link here: https://your-deploy.example
-
+## Screenshots
