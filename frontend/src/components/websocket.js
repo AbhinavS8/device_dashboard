@@ -132,20 +132,10 @@ export default function SocketMessages() {
             }}>{topic}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart
-                data={(topicData[topic] || []).map((entry) => {
-                  // If entry.data is an object, spread its fields; else, use 'value'
-                  if (typeof entry.data === "object" && entry.data !== null) {
-                    return {
-                      ...entry.data,
-                      timestamp: new Date(entry.timestamp).toLocaleTimeString(),
-                    };
-                  } else {
-                    return {
-                      value: entry.data,
-                      timestamp: new Date(entry.timestamp).toLocaleTimeString(),
-                    };
-                  }
-                })}
+                data={(topicData[topic] || []).map((entry) => ({
+                  value: entry.data,
+                  timestamp: new Date(entry.timestamp).toLocaleTimeString(),
+                }))}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
@@ -156,28 +146,13 @@ export default function SocketMessages() {
                   labelStyle={{ color: "#90caf9" }}
                 />
                 <Legend wrapperStyle={{ color: "#f1f1f1" }} />
-                {/* Dynamically render lines for each key except timestamp */}
-                {(() => {
-                  const dataArr = topicData[topic] || [];
-                  if (dataArr.length === 0) return null;
-                  const sample = dataArr[0].data;
-                  let keys = [];
-                  if (typeof sample === "object" && sample !== null) {
-                    keys = Object.keys(sample).filter(k => k !== "timestamp");
-                  } else {
-                    keys = ["value"];
-                  }
-                  return keys.map((key, idx) => (
-                    <Line
-                      key={key}
-                      type="monotone"
-                      dataKey={key}
-                      stroke={idx === 0 ? "#90caf9" : "#ff9800"}
-                      dot={false}
-                      strokeWidth={2}
-                    />
-                  ));
-                })()}
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#90caf9"
+                  dot={false}
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
