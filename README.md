@@ -9,7 +9,7 @@ A JavaScript dashboard that collects, visualizes, and stores data from IoT devic
 - Simple backend API for ingestion and retrieval (Node/Express)
 
 ## Tech stack
-- Frontend: React + Chart.js
+- Frontend: React + Recharts
 - Backend: Node.js + Express
 - Communication: MQTT, WebSocket
 
@@ -37,4 +37,3 @@ A JavaScript dashboard that collects, visualizes, and stores data from IoT devic
      ```
 5. Open http://localhost:3000
 
-## Screenshots
