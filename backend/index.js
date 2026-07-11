@@ -5,10 +5,10 @@ const socketio = require("socket.io");
 const mqtt = require("mqtt");
 const mongoose = require("mongoose");
 
+const config = require("./config/env.js");
+
 // MongoDB connection
-mongoose.connect("mongodb://localhost:27017/device_dashboard", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect(process.env.MONGO_URI, {
 });
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
@@ -27,12 +27,12 @@ const app = express();
 const server = http.createServer(app); //needed to hook in socketio explicitly
 const io = socketio(server, {
   cors: {
-    origin: "http://localhost:3000", // React dev server
+    origin: process.env.CORS_ORIGIN, // React dev server
     methods: ["GET", "POST"]
   }
 });
 
-const client = mqtt.connect("mqtt://test.mosquitto.org:1883");
+const client = mqtt.connect(process.env.MQTT_URL);
 client.on("connect", () => {
   console.log("Connected to MQTT broker");
   // client.subscribe("myhome/sensors/temperature"); 
@@ -42,7 +42,7 @@ client.on("connect", () => {
 });
 
 app.use(cors());
-const port=5000;
+const port=process.env.PORT;
 
 app.get("/", (req,res) => {
     res.send("waz good from express+node")
