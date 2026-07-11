@@ -6,6 +6,7 @@ const mqtt = require("mqtt");
 const mongoose = require("mongoose");
 
 const config = require("./config/env.js");
+const SensorData = require("./models/sensorData.js");
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -16,13 +17,6 @@ db.once("open", () => {
   console.log("Connected to MongoDB");
 });
 
-// Sensor Data Schema
-const sensorDataSchema = new mongoose.Schema({
-  topic: String,
-  data: mongoose.Schema.Types.Mixed,
-  timestamp: { type: Date, default: Date.now },
-});
-const SensorData = mongoose.model("SensorData", sensorDataSchema);
 const app = express();
 const server = http.createServer(app); //needed to hook in socketio explicitly
 const io = socketio(server, {
