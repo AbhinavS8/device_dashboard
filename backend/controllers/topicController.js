@@ -1,11 +1,11 @@
-const SensorData = require("../models/sensorData");
 const telemetryService = require("../services/telemetryService");
 
 // API endpoint to get data for a topic
 module.exports.getTopicHistory = async (req, res) => {
-    const topic = req.params.topic;
-    const limit = parseInt(req.query.limit) || 100;
+    // const topic = req.params.topic;
+    // const limit = parseInt(req.query.limit) || 100;
     // Get last entries for the topic
+    const { topic, limit } = req.validated;
     const data = await telemetryService.getTopicHistory(topic, limit);
     res.json(data);
 };

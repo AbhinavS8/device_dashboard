@@ -4,10 +4,12 @@ const SensorData = require("../models/sensorData");
 const topicController = require("../controllers/topicController");
 
 const router = express.Router();
+const validateTelemetryRequest = require("../middleware/validateTelemetryRequest");
 
 router.get(
-    "/topic/:topic",
-    topicController.getTopicHistory
+  "/topic/:topic",
+  validateTelemetryRequest,
+  topicController.getTopicHistory
 );
 
 router.get(
