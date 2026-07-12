@@ -2,14 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
-const mqtt = require("mqtt");
 const mongoose = require("mongoose");
 
 const config = require("./config/env.js");
-const SensorData = require("./models/sensorData.js");
 const databaseConnection = require("./config/database.js");
-
+const mqttService = require("./services/mqttService.js");
 const topicRoutes = require("./routes/topicRoutes");
+
+const SensorData = require("./models/sensorData.js");
 
 
 
@@ -28,14 +28,9 @@ const topicRoutes = require("./routes/topicRoutes");
       }
     });
 
-    const client = mqtt.connect(process.env.MQTT_URL);
-client.on("connect", () => {
-  console.log("Connected to MQTT broker");
-  // client.subscribe("myhome/sensors/temperature"); 
-  // client.subscribe("myhome/sensors/humidity");
-
-  //multiple clients, one for each graph
-});
+    mqttService.initialize((event, payload) => {
+      io.emit(event, payload);
+    });
 
 app.use(cors());
 const port=process.env.PORT;
@@ -60,7 +55,7 @@ io.on("connection", (socket) => {
     
     socket.on("subscribeTopic", (message) => {
       console.log("subscribing to:",message);
-      client.subscribe(message);
+      mqttService.subscribe(message);
     })
 
     socket.on("disconnect", ()=> {
@@ -68,18 +63,6 @@ io.on("connection", (socket) => {
       })
 });
 
-// Handle MQTT messages globally (outside socket connection)
-client.on("message", async (topic, message) => {
-  try {
-    const parsed = JSON.parse(message.toString());
-    io.emit("sensorUpdate", { topic, ...parsed });
-    // Store in MongoDB
-    await SensorData.create({ topic, data: parsed });
-    console.log(`Stored data for topic: ${topic}`);
-  } catch (err) {
-    console.error("Failed to parse MQTT message:", message.toString());
-  }
-});
 
 
 server.listen(port, () => console.log(`server starting...`));

@@ -1,50 +1,78 @@
-export class MQTTService {
-  constructor(host, messageCallbacks) {
-    this.mqttClient = null;
-    this.host = host;
-    this.messageCallbacks = messageCallbacks;
-  }
+// services/mqttService.js
 
-  connect() {
-    this.mqttClient = mqtt.connect(this.host);
+const mqtt = require("mqtt");
+const telemetryService = require("./telemetryService");
 
-    // MQTT Callback for 'error' event
-    this.mqttClient.on("error", (err) => {
-      console.log(err);
-      this.mqttClient.end();
-      if (this.messageCallbacks && this.messageCallbacks.onError)
-        this.messageCallbacks.onError(err);
-    });
+let client;
 
-    // MQTT Callback for 'connect' event
-    this.mqttClient.on("connect", () => {
-      console.log(`MQTT client connected`);
-      if (this.messageCallbacks && this.messageCallbacks.onConnect) {
-        this.messageCallbacks.onConnect("Connected");
-      }
-    });
+/**
+ * Connect to the MQTT broker and register callbacks.
+ */
+function initialize(io) {
+  client = mqtt.connect(process.env.MQTT_URL);
 
-    // Call the message callback function when message arrived
-    this.mqttClient.on("message", (topic, message) => {
-      if (this.messageCallbacks && this.messageCallbacks.onMessage) {
-        this.messageCallbacks.onMessage(topic, message);
-      }
-    });
+  client.on("connect", () => {
+    console.log("Connected to MQTT broker");
+  });
 
-    this.mqttClient.on("close", () => {
-      console.log(`MQTT client disconnected`);
-      if (this.messageCallbacks && this.messageCallbacks.onClose)
-        this.messageCallbacks.onClose();
-    });
-  }
+  client.on("error", (err) => {
+    console.error("MQTT Error:", err);
+  });
 
-  // Publish MQTT Message
-  publish(topic, message, options) {
-    this.mqttClient.publish(topic, message);
-  }
+  client.on("close", () => {
+    console.log("Disconnected from MQTT broker");
+  });
 
-  // Subscribe to MQTT Message
-  subscribe(topic, options) {
-    this.mqttClient.subscribe(topic, options);
-  }
+  client.on("message", async (topic, message) => {
+    try {
+      const parsed = JSON.parse(message.toString());
+
+      // Store in MongoDB
+      await telemetryService.saveReading(topic, parsed);
+
+      // Broadcast to all connected clients
+      io.emit("sensorUpdate", {
+        topic,
+        ...parsed,
+      });
+
+      console.log(`Stored data for topic: ${topic}`);
+    } catch (err) {
+      console.error("Failed to process MQTT message:", err);
+    }
+  });
 }
+
+/**
+ * Subscribe to an MQTT topic.
+ */
+function subscribe(topic) {
+  if (!client) {
+    throw new Error("MQTT client has not been initialized.");
+  }
+
+  client.subscribe(topic, (err) => {
+    if (err) {
+      console.error(`Failed to subscribe to ${topic}:`, err);
+    } else {
+      console.log(`Subscribed to ${topic}`);
+    }
+  });
+}
+
+/**
+ * Optional helper if you later add device commands.
+ */
+function publish(topic, message) {
+  if (!client) {
+    throw new Error("MQTT client has not been initialized.");
+  }
+
+  client.publish(topic, message);
+}
+
+module.exports = {
+  initialize,
+  subscribe,
+  publish,
+};
