@@ -7,26 +7,27 @@ const mongoose = require("mongoose");
 
 const config = require("./config/env.js");
 const SensorData = require("./models/sensorData.js");
+const databaseConnection = require("./config/database.js");
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-});
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => {
-  console.log("Connected to MongoDB");
-});
 
-const app = express();
-const server = http.createServer(app); //needed to hook in socketio explicitly
-const io = socketio(server, {
-  cors: {
-    origin: process.env.CORS_ORIGIN, // React dev server
-    methods: ["GET", "POST"]
-  }
-});
 
-const client = mqtt.connect(process.env.MQTT_URL);
+(async () => {
+  try {
+    // 1. Connect to MongoDB first and await the connection promise
+    console.log("Attempting to connect to MongoDB...");
+    await databaseConnection();
+
+    const app = express();
+    const server = http.createServer(app); //needed to hook in socketio explicitly
+    const io = socketio(server, {
+      cors: {
+        origin: process.env.CORS_ORIGIN, // React dev server
+        methods: ["GET", "POST"]
+      }
+    });
+
+    const client = mqtt.connect(process.env.MQTT_URL);
 client.on("connect", () => {
   console.log("Connected to MQTT broker");
   // client.subscribe("myhome/sensors/temperature"); 
@@ -145,3 +146,12 @@ app.delete("/api/topic/:topic/cleanup", async (req, res) => {
 });
 
 server.listen(port, () => console.log(`server starting...`));
+
+
+  } catch (error) {
+    console.error("Application failed to start:", error);
+    // Exit the process if setup fails
+    process.exit(1);
+  }
+})();
+
